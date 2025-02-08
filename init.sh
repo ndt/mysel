@@ -40,4 +40,3 @@ sed -i "s/ROUNDCUBEMAIL_OIDC_SECRET/${ROUNDCUBEMAIL_OIDC_SECRET}/g" roundcube/co
 set -e
 ./openldap/generate_bootstrap.sh
 
-
