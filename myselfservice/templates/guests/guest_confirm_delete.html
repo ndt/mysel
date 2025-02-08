@@ -1,0 +1,13 @@
+
+<!-- templates/guests/guest_confirm_delete.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Gast-Account löschen</h1>
+<p>Möchten Sie den Gast-Account für "{{ object.name }}" wirklich löschen?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Löschen</button>
+    <a href="{% url 'guests:list' %}" class="btn btn-secondary">Abbrechen</a>
+</form>
+{% endblock %}

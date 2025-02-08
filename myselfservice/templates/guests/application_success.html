@@ -1,0 +1,21 @@
+<!-- templates/guests/application_success.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Antrag erfolgreich gestellt!</h4>
+    </div>
+    <div class="card-body">
+        <p>Bitte notieren Sie sich Ihre Zugangsdaten:</p>
+        <p>
+            <strong>E-Mail:</strong> {{ guest.username }}<br>
+            <strong>Passwort:</strong> {{ guest.password }}
+        </p>
+        <p class="mb-0">
+            Ihr Sponsor wurde benachrichtigt und muss den Zugang noch freischalten.
+            Die Zugangsdaten wurden auch per E-Mail versandt.
+        </p>
+    </div>
+</div>
+{% endblock %}

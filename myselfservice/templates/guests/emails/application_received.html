@@ -1,0 +1,20 @@
+<!-- templates/guests/emails/application_received.html -->
+{% extends 'emails/base.html' %}
+
+{% block content %}
+<h2>Ihr WLAN-Zugang wurde beantragt</h2>
+
+<p>Hallo {{ guest.name }},</p>
+
+<p>Ihr Antrag auf einen WLAN-Zugang wurde erfolgreich gestellt. 
+Ihre Zugangsdaten lauten:</p>
+
+<ul>
+    <li>Username: {{ credentials.username }}</li>
+    <li>Passwort: {{ credentials.password }}</li>
+</ul>
+
+<p>Der Zugang muss noch von Ihrem Sponsor freigeschaltet werden. 
+Sie erhalten eine weitere E-Mail, sobald dies geschehen ist.</p>
+
+{% endblock %}

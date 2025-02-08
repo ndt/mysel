@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="container" style="max-width: 800px;">
+        <div class="card mb-3">
+          <div class="card-body px-4">
+            <h3 class="card-title mb-3"><i class="fas fa-solid fa-users me-2"></i>{% if form.instance.pk %}Veranstaltung bearbeiten{% else %}Neue Veranstaltung{% endif %}</h3>
+    
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                    <a href="{% url 'events:list' %}" class="btn btn-outline-secondary">Abbrechen</a>
+                </div>
+            </form>
+          </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

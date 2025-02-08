@@ -1,0 +1,24 @@
+<!-- templates/guests/emails/account_activated.html -->
+{% extends 'emails/base.html' %}
+
+{% block content %}
+<h2>Ihr WLAN-Zugang wurde aktiviert</h2>
+
+<p>Hallo {{ guest.name }},</p>
+
+<p>Ihr WLAN-Zugang wurde soeben aktiviert. Sie können sich ab sofort mit 
+folgenden Zugangsdaten einloggen:</p>
+
+<ul>
+    <li>Username: {{ credentials.username }}</li>
+    <li>Passwort: {{ credentials.password }}</li>
+</ul>
+
+<p>Der Zugang ist gültig bis: {{ guest.end_date|date:"d.m.Y" }}</p>
+
+{% if settings.WLAN_LOGIN_URL %}
+<p>
+    <a href="{{ settings.WLAN_LOGIN_URL }}" class="button">Zum WLAN-Login</a>
+</p>
+{% endif %}
+{% endblock %}

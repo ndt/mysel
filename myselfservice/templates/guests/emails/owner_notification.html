@@ -1,0 +1,27 @@
+<!-- templates/guests/emails/owner_notification.html -->
+{% extends 'emails/base.html' %}
+
+{% block content %}
+<h2>Neuer WLAN-Zugang beantragt</h2>
+
+<p>Hallo {% if guest.owner %}{{ guest.owner.get_full_name|default:guest.owner.username }}{% endif %},</p>
+
+<p>es liegt ein neuer Antrag auf einen WLAN-Zugang vor:</p>
+
+<ul>
+    <li><strong>Name:</strong> {{ guest.name }}</li>
+    <li><strong>E-Mail:</strong> {{ guest.username }}</li>
+    {% if guest.message %}
+    <li><strong>Nachricht:</strong> {{ guest.message }}</li>
+    {% endif %}
+</ul>
+
+<p>
+    <a href="{{ approval_url }}" class="button">
+        Zugang jetzt freischalten
+    </a>
+</p>
+
+<p>Alternativ können Sie den Antrag auch im Portal unter "Meine Gäste" bearbeiten.</p>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+  <div class="card mb-3">
+    <div class="card-body px-4">
+      <h3 class="card-title mb-3">
+        {% if user.is_authenticated %}
+          <i class="fas fa-user-plus me-2"></i>Neuen Gast anlegen
+        {% else %}
+          <i class="fas fa-wifi me-2"></i>WLAN-Zugang beantragen
+        {% endif %}
+      </h3>
+
+      {% if not user.is_authenticated %}
+      <div class="alert alert-info border-0 rounded-3 mb-3">
+        <i class="fas fa-info-circle me-2"></i>
+        Sollten Sie Gast:in einer Mitarbeiterin oder eines Mitarbeiters sein,
+        können Sie Ihre Gastgeberin oder Ihren Gastgeber nach einem WLAN-Gastzugang fragen.
+        Füllen Sie einfach untenstehende Informationen aus <strong>und notieren sich das angezeigte Passwort
+        unverzüglich</strong>. Ihr Benutzername wird Ihre eigene E-Mail-Adresse sein.
+        Nachdem ihre Gastgeberin oder ihr Gastgeber dem Antrag zugestimmt hat,
+        können Sie sich mit diesen Daten im WLAN <strong>THGA</strong> einloggen.
+      </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-primary">
+            {% if user.is_authenticated %}
+              <i class="fas fa-plus me-2"></i>Gast anlegen
+            {% else %}
+              <i class="fas fa-check me-2"></i>Zugang beantragen
+            {% endif %}
+          </button>
+        <div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mb-4">
+    <div class="row">
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4 class="card-title"><i class="fas fa-info-circle"></i> WLAN-Gastaccounts</h4>
+                    <p class="card-text">
+                        Auf dieser Seite sehen Sie Anfragen für Gästenetz-Zugänge.
+                        Sie können damit einzelnen Gästen für bis zu vier Wochen Zugang zum WLAN geben.
+                    </p>
+                    <hr>
+                    <p class="card-text mb-0">
+                        <strong>Wichtig:</strong> Als Bürge bestätigen Sie, die Identität Ihrer Gäste geprüft zu haben.
+                    </p>                       
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4 class="card-title">Wie funktionieren die WLAN-Gastaccounts?</h4>
+                    <p class="card-text">
+                        Gäste können unter Angabe ihrer E-Mail-Adresse und der ihres Gastgebers einen Zugang beantragen. 
+                        Der Gastgeber wird darüber per E-Mail benachrichtigt und kann den Gast freischalten.
+                    </p>
+                    <p class="card-text mb-0">
+                        Nach erfolgreicher Freischaltung kann sich der Gast mit seiner E-Mail-Adresse und seinem Passwort einloggen.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wartende Anfragen -->
+    <div class="card mb-4">
+        <h2 class="card-header h5 d-flex align-items-center">
+            <i class="fas fa-clock me-2"></i> Offene Anfragen
+        </h2>
+        <div class="card-body p-0">
+            {% for guest in pending_guests %}
+            <div class="p-3 border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-warning me-2" role="status">Wartend</span>
+                            <h3 class="h6 mb-0">{{ guest.name }}</h3>
+                        </div>
+                        <div class="text-muted small">
+                            <i class="fas fa-envelope me-1"></i> {{ guest.username }}
+                        </div>
+                        {% if guest.message %}
+                        <div class="text-muted small mt-1">
+                            <i class="fas fa-comment me-1"></i> {{ guest.message|truncatechars:80 }}
+                        </div>
+                        {% endif %}
+                        <div class="text-muted small mt-1">
+                            <i class="fas fa-calendar me-1"></i> Anfrage vom: {{ guest.created_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3 mt-md-0">
+                        <div class="d-flex gap-2 justify-content-md-end">
+                            <form method="post" action="{% url 'guests:update' guest.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <label class="visually-hidden" for="duration-{{ guest.id }}">Zugangsdauer</label>
+                                    <select id="duration-{{ guest.id }}" name="duration" class="form-select">
+                                        {% for value, label in guest.DURATIONS.items %}
+                                            <option value="{{ value }}" {% if guest.duration == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" name="action" value="activate" class="btn btn-outline-secondary">
+                                        <i class="fas fa-check me-1"></i> Aktivieren
+                                    </button>
+                                </div>
+                            </form>
+                            <form method="post" action="{% url 'guests:update' guest.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger" name="action" value="deactivate"
+                                        onclick="return confirm('Wollen Sie den Antrag wirklich löschen?')"
+                                        aria-label="Antrag löschen">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Aktive Bürgschaften -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h2 class="h5 m-0"><i class="fas fa-user-check me-2"></i>Aktive Gastaccounts</h2>
+            <a href="{% url 'guests:create' %}">Gast-Account erstellen</a>
+        </div>
+        <div class="card-body p-0">
+            {% for guest in active_guests %}
+            <div class="p-3 border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success me-2" role="status">Aktiv</span>
+                            <h3 class="h6 mb-0">{{ guest.name }}</h3>
+                        </div>
+                        <div class="text-muted small">
+                            <i class="fas fa-envelope me-1"></i> {{ guest.username }}
+                        </div>
+                        <div class="text-muted small mt-1">
+                            <i class="fas fa-calendar-check me-1"></i> Aktiv seit: {{ guest.start_date|date:"d.m.Y" }}
+                        </div>
+                        <div class="text-muted small mt-1">
+                            <i class="fas fa-hourglass-end me-1"></i> Läuft ab: {{ guest.end_date|date:"d.m.Y" }}
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3 mt-md-0">
+                        <div class="d-flex gap-2 justify-content-md-end">
+                            <div class="d-flex flex-column flex-xl-row gap-2">
+                                <form method="post" action="{% url 'guests:update' guest.id %}">
+                                    {% csrf_token %}
+                                    <div class="input-group">
+                                        <label class="visually-hidden" for="extend-duration-{{ guest.id }}">Verlängerungsdauer</label>
+                                        <select id="duration-{{ guest.id }}" name="duration" class="form-select">
+                                            {% for value, label in guest.DURATIONS.items %}
+                                                <option value="{{ value }}" {% if guest.duration == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn btn-outline-secondary" name="action" value="extend">
+                                            <i class="fas fa-clock me-1"></i> Verlängern
+                                        </button>
+                                    </div>
+                                </form>
+                                <form method="post" action="{% url 'guests:delete' guest.pk %}" class="d-flex flex-column">
+
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-outline-danger"
+                                        name="action"
+                                        value="delete" 
+                                        title="Account löschen"
+                                        onclick="return confirm('Account wirklich löschen?')">
+                                    <i class="fas fa-trash me-1 me-xl-0"></i>
+                                    <span class="d-inline d-xl-none">Account löschen</span>
+                                </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Gelöschte Bürgschaften -->
+    <div class="card mt-4">
+        <h2 class="card-header h5 d-flex align-items-center">
+            <i class="fas fa-user-times me-2"></i> Kürzlich abgelaufene oder gelöschte Gastaccounts
+        </h2>
+        <div class="card-body p-0">
+            {% for guest in deleted_guests %}
+            <div class="p-3 border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge {% if guest.status == guest.Status.DELETED %}bg-danger{% else %}bg-warning{% endif %} me-2" role="status">
+                                {% if guest.status == guest.Status.DELETED %}Gelöscht{% else %}Abgelaufen{% endif %}
+                            </span>
+                            <h3 class="h6 mb-0">{{ guest.name }}</h3>
+                        </div>
+                        <div class="text-muted small">
+                            <i class="fas fa-envelope me-1"></i> {{ guest.username }}
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3 mt-md-0">
+                        <div class="d-flex gap-2 justify-content-md-end">
+                            <form method="post" action="{% url 'guests:update' guest.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <label class="visually-hidden" for="reactivate-duration-{{ guest.id }}">Aktivierungsdauer</label>
+                                    <select id="reactivate-duration-{{ guest.id }}" name="duration" class="form-select">
+                                            {% for value, label in guest.DURATIONS.items %}
+                                                <option value="{{ value }}" {% if value == 7 %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    <button type="submit" class="btn btn-outline-secondary" name="action" value="reactivate">
+                                        <i class="fas fa-undo me-1"></i> Reaktivieren
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="card-footer text-center">
+            <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Abgelaufene und gelöschte Gast-Accounts werden nach zwei Wochen automatisch vollständig gelöscht.
+            </small>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

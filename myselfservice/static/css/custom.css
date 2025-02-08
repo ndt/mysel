@@ -1,0 +1,86 @@
+.asteriskField {
+    display: none;
+  }
+
+.form-group {
+    margin-bottom: 1rem;
+}
+:root {
+    --bs-primary: #003c7c;
+    --bs-primary-rgb: 0, 60, 124;
+    --hover-color: #002349;
+    --bs-link-color: var(--bs-primary);
+    --bs-link-hover-color: var(--hover-color);
+
+}
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #FAFAFA;
+}
+.btn-outline-primary {
+    color: var(--bs-link-hover-color);
+    border-color: var(--bs-link-hover-color);
+}
+.btn-primary:hover, .btn-outline-primary:hover,
+.btn-primary:focus, .btn-outline-primary:focus {
+    background-color: var(--hover-color);
+    border-color: var(--hover-color);
+}
+
+a {
+    color: var(--bs-primary);
+}
+
+a:hover {
+    color: var(--hover-color);
+}
+.navbar .navbar-nav .nav-item {
+    margin-right: 1.5rem;
+  }
+  
+.navbar .navbar-nav .nav-item .nav-link {
+color: var(--bs-primary);
+}
+
+.navbar .navbar-nav .nav-item .nav-link:hover,
+.navbar .navbar-nav .nav-item .nav-link.active {
+color: var(--nav-hover-color);
+}
+
+
+.navbar .navbar-nav .nav-item .nav-link {
+    position: relative;
+}
+
+.navbar .navbar-nav .nav-item .nav-link::after {
+    position: absolute;
+    content: '';
+    left: 0;
+    bottom: -5px;
+    height: 2px;
+    width: 0;
+    background-color: var(--bs-primary);
+    transition: width 0.2s ease-in-out;
+}
+
+.navbar .navbar-nav .nav-item .nav-link:hover::after {
+    color: var(--hover-color);
+    width: 100%;
+}
+
+.navbar .navbar-nav .nav-item .nav-link.active::after {
+    color: var(--hover-color);
+    width: 100%;
+}
+
+/* Originales Dropdown-Icon ausblenden */
+.user-dropdown::after {
+    display: none;
+}
+
+/* Der Selektor muss bis zum Icon durchgehen */
+.dropdown-toggle[aria-expanded="true"] .dropdown-icon {
+    transform: rotate(180deg);
+}

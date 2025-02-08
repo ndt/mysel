@@ -1,0 +1,24 @@
+<!-- templates/core/landing.html -->
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+      <h1>Willkommen bei MySelfservice</h1>
+      <p class="lead">
+        Verwalten Sie hier Ihre WLAN-Zugänge und Gäste-Accounts.
+      </p>
+      <div class="mt-4">
+        <a href="{% url 'openid_connect_login' 'keycloak' %}" class="btn btn-primary btn-lg">
+          Login
+        </a>
+        <a href="{% url 'guests:create' %}" class="btn btn-outline-primary btn-lg ms-2">
+          Als Gast registrieren
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

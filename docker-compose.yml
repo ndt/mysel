@@ -1,0 +1,109 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    env_file:
+      - .env
+    volumes:
+      - ./postgres/init-roundcube-db.sh:/docker-entrypoint-initdb.d/init-roundcube-db.sh
+      - ./postgres/init-django-db.sh:/docker-entrypoint-initdb.d/init-django-db.sh
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mailnet
+
+  openldap:
+    image: osixia/openldap:latest
+    container_name: openldap
+    env_file:
+      - .env
+    volumes:
+      - ./openldap/bootstrap/schema:/container/service/slapd/assets/config/bootstrap/schema/custom
+      - ./openldap/bootstrap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    ports:
+      - "389:389"
+    command: --copy-service
+    networks:
+      - mailnet
+
+  mailserver:
+    container_name: mailserver
+    build: 
+      context: ./mailserver
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - openldap
+    env_file:
+      - .env
+    volumes:
+      - mail_data:/var/mail
+    ports:
+      - "25:25"
+      - "143:143"
+    networks:
+      - mailnet
+
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    container_name: roundcube
+    environment:
+      ROUNDCUBEMAIL_DEFAULT_HOST: "tls://mailserver"
+      ROUNDCUBEMAIL_SMTP_SERVER: "tls://mailserver"
+      ROUNDCUBEMAIL_DB_TYPE: "pgsql"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - mailserver
+    volumes:
+      - ./roundcube/config/:/var/roundcube/config
+    ports:
+      - "8081:80"
+    networks:
+      - mailnet
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    env_file:
+      - .env
+    environment:
+      KC_IMPORT: /opt/keycloak/data/import/realm-export.json
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak/import:/opt/keycloak/data/import
+    depends_on:
+      - postgres
+      - openldap
+    networks:
+      - mailnet
+
+  myselfservice:
+    container_name: myselfservice
+    build: 
+      context: ./myselfservice
+      target: development
+    depends_on:
+      - postgres
+      - keycloak
+    volumes:
+      - ./myselfservice:/app
+    environment:
+      - DEBUG=True
+      - PYTHONPATH=/app
+    env_file:
+      - .env
+    networks:
+      - mailnet
+    ports:
+      - "8000:8000"
+
+volumes:
+  keycloak_data:
+  postgres_data:
+  mail_data:
+networks:
+  mailnet:

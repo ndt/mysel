@@ -1,0 +1,12 @@
+django
+django-allauth[socialaccount]
+psycopg2-binary
+django-environ
+django-crispy-forms
+django-friendly-captcha
+crispy-bootstrap4
+ldap3
+reportlab
+svglib
+msal
+uvicorn
