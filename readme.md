@@ -37,10 +37,15 @@ Fügen Sie folgende Einträge in `/etc/hosts` hinzu:
 ```
 Dieses Script generiert die notwendigen Konfigurationen basierend auf der `.env` Datei.
 
-### 3. Start des Systems
+### 3. Start des Systems und Nutzung
 ```bash
 docker compose up --build
 ```
+- Anmeldung an Webmail http://roundcube:8081 (SSO) und LDAP-Zugangsdaten (Username: testuser1@example.org, Passwort: testuser1)
+- Anmelden an imap (localhost:143 STARTTLS) mit LDAP-Zugangsdaten (siehe z.B. `simple-tests.sh`)
+- Anmelden an Django-Webinterface (SSO (Username: testuser1@example.org, Passwort: testuser1)) -> Email-Konten -> Account generieren
+- Anschließend wieder testen mit `simple-tests.sh`
+
 
 ## Neustart nach Konfigurationsänderungen
 Bei Änderungen an der Konfiguration:
