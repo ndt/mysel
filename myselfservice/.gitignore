@@ -29,7 +29,7 @@ media/
 venv/
 .env
 # übergang
-migrations/
+#migrations/
 
 # logging
 logs/
