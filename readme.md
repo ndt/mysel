@@ -51,10 +51,15 @@ Mit dem `--reverse` Parameter können die Ersetzungen an den Konfigurationsdatei
 ```bash
 docker compose up --build
 ```
-- Anmeldung an Webmail http://roundcube:8081 (SSO) und LDAP-Zugangsdaten (Username: testuser1@example.org, Passwort: testuser1)
-- Anmelden an imap (localhost:143 STARTTLS) mit LDAP-Zugangsdaten (siehe z.B. `simple-tests.sh`)
-- Anmelden an Django-Webinterface (SSO (Username: testuser1@example.org, Passwort: testuser1)) -> Email-Konten -> Account generieren
-- Anschließend wieder testen mit `simple-tests.sh`
+1. Initialzustand:
+    - Anmeldung an Webmail http://roundcube:8081 (SSO) und LDAP-Zugangsdaten (Username: testuser1@example.org, Passwort: testuser1)
+    - Gültige Anmeldung an imap (localhost:143 STARTTLS) mit LDAP-Zugangsdaten
+2. Wechsel zu Geräte-Passwörtern:
+    1. Anmelden an Django-Webinterface (SSO (Username: testuser1@example.org, Passwort: testuser1)) -> Email-Konten -> Account generieren
+    2. Anmeldung mit LDAP-Zugangsdaten an imap (localhost:143 STARTTLS) nicht mehr möglich
+    3. Anmeldung nur noch mit generierten Zugangsdaten möglich
+
+Dieser Testablauf kann auch automatisiert durchlaufen werden: `docker compose run --rm tests` 
 
 
 ## Neustart nach Konfigurationsänderungen

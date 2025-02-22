@@ -101,6 +101,17 @@ services:
     ports:
       - "8000:8000"
 
+  tests:
+    container_name: tests
+    build:
+      context: ./tests
+    depends_on:
+      - keycloak
+      - mailserver
+      - myselfservice
+    networks:
+      - mailnet
+
 volumes:
   keycloak_data:
   postgres_data:

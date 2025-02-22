@@ -1,58 +1,48 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from unittest.mock import patch
 from allauth.socialaccount.models import SocialAccount
-from allauth.socialaccount.tests import MockedResponse
+from allauth.account.models import EmailAddress
 
 class KeycloakAuthenticationTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.provider_config = {
-            'authorization_endpoint': 'http://keycloak/auth',
-            'token_endpoint': 'http://keycloak/token',
-            'userinfo_endpoint': 'http://keycloak/userinfo',
-        }
+        self.app_id = 'keycloak'
+        self.test_username = 'testuser1@example.org'
+        self.test_password = 'testuser1'
         
-        self.user_info = {
-            'sub': '12345',
-            'email': 'testuser1@example.org',
-            'preferred_username': 'testuser1',
-            'groups': ['eduroam_access']
-        }
-
-    @patch('allauth.socialaccount.providers.oauth2.views.OAuth2Adapter.get_provider')
-    def test_oidc_login_and_permission(self, mock_adapter):
-        mock_adapter.return_value.get_provider_config.return_value = self.provider_config
+    def test_oidc_login_and_permission(self):
+        """Test real OIDC login flow with Keycloak"""
         
-        token_response = {
-            'access_token': 'fake_access_token',
-            'token_type': 'Bearer',
-            'expires_in': 3600,
-            'refresh_token': 'fake_refresh_token',
-            'id_token': 'fake_id_token'
-        }
+        # Start des Login-Flows
+        login_url = reverse('openid_connect_login', kwargs={'provider_id': self.app_id})
+        response = self.client.get(login_url)
+        self.assertEqual(response.status_code, 302)
         
-        with patch('allauth.socialaccount.providers.oauth2.views.OAuth2LoginView.dispatch') as mock_login:
-            mock_login.return_value = MockedResponse(200, token_response)
-            
-            with patch('allauth.socialaccount.providers.oauth2.views.OAuth2CallbackView.get_client') as mock_client:
-                mock_client.return_value.get_user_info.return_value = self.user_info
-                
-                response = self.client.get(reverse('oidc_login'))
-                self.assertEqual(response.status_code, 302)
-                
-                response = self.client.get(reverse('oidc_callback'), {'code': 'fake_code', 'state': 'fake_state'})
-                self.assertEqual(response.status_code, 302)
-                
-                user = get_user_model().objects.get(email='testuser1@example.org')
-                self.assertTrue(user.is_authenticated)
-                self.assertTrue(user.has_perm('eduroam_access'))
-                
-                social_account = SocialAccount.objects.get(user=user)
-                self.assertEqual(social_account.provider, 'keycloak')
-                self.assertEqual(social_account.uid, '12345')
+        # Die Redirect-URL sollte zur Keycloak-Login-Seite führen
+        keycloak_login_url = response['Location']
+        self.assertIn('keycloak:8080', keycloak_login_url)
+        
+        # Simuliere Login bei Keycloak durch direktes POSTen der Credentials
+        # (Dies erfordert, dass die Test-Keycloak-Instanz läuft und der User existiert)
+        response = self.client.post(keycloak_login_url, {
+            'username': self.test_username,
+            'password': self.test_password
+        }, follow=True)
+        
+        # Nach erfolgreichem Login sollte der User in Django existieren
+        user = get_user_model().objects.get(username=self.test_username)
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.has_perm('eduroam_access'))
+        
+        # Überprüfe den Social Account
+        social_account = SocialAccount.objects.get(user=user)
+        self.assertEqual(social_account.provider, 'openid_connect')
+        
+        # Überprüfe ob der User eingeloggt ist
+        self.assertTrue(user.is_authenticated)
 
     def tearDown(self):
         get_user_model().objects.all().delete()
         SocialAccount.objects.all().delete()
+        EmailAddress.objects.all().delete()
