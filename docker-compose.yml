@@ -4,8 +4,6 @@ services:
     container_name: postgres
     env_file:
       - .env
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - ./postgres/init-roundcube-db.sh:/docker-entrypoint-initdb.d/init-roundcube-db.sh
       - ./postgres/init-django-db.sh:/docker-entrypoint-initdb.d/init-django-db.sh
