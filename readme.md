@@ -1,13 +1,13 @@
 # Email Authentication PoC
 
 ## Übersicht
-Dieser Proof of Concept (PoC) demonstriert eine sichere Authentifizierungslösung für E-Mail-Dienste, die sowohl OAuth2 für Webmail als auch gerätebasierte Authentifizierungen für native E-Mail-Clients unterstützt.
+Dieser Proof of Concept (PoC) demonstriert eine Authentifizierungslösung für E-Mail-Dienste, die sowohl OAuth2 für Webmail als auch gerätebasierte Authentifizierungen für native E-Mail-Clients (Thunderbird, etc.) unterstützt.
 
 ## Hauptfunktionen
 - Webmail-Zugriff via OAuth2/OIDC
-- Verwaltung von Geräte-spezifischen Passwörtern über Webinterface
-- Automatische Deaktivierung der LDAP-Authentifizierung nach Einrichtung von Geräte-Passwörtern
 - Selfservice-Portal für Benutzer
+ - Verwaltung von Geräte-spezifischen Passwörtern über Webinterface
+- Automatische Deaktivierung der LDAP-Authentifizierung nach Einrichtung von Geräte-Passwörtern
 
 ## Komponenten
 - OpenLDAP (Benutzerverwaltung)
@@ -16,10 +16,12 @@ Dieser Proof of Concept (PoC) demonstriert eine sichere Authentifizierungslösun
 - Roundcube (Webmail-Client)
 - Dovecot/Postfix (Mailserver)
 - Django (Selfservice-Portal)
+
 ## Voraussetzungen
 - Docker und Docker Compose
-- OpenSSL
+- OpenSSL (um die LDAP-Passwörter zu generieren)
 - Bearbeitung der `/etc/hosts` Datei
+- Browser auf dem Docker-Host-System
 
 ## Installation
 
@@ -35,7 +37,15 @@ Fügen Sie folgende Einträge in `/etc/hosts` hinzu:
 ```bash
 ./init.sh
 ```
-Dieses Script generiert die notwendigen Konfigurationen basierend auf der `.env` Datei.
+
+Das `init.sh` Script automatisiert die initiale Einrichtung:
+
+- Erstellt eine `.env` Datei aus der `env.example`
+- Ersetzt Platzhalter in verschiedenen Konfigurationsdateien mit den tatsächlichen Werten aus der `.env`
+- Konfiguriert Git so, dass sensible Dateien nicht versehentlich committed werden aber trotzdem Teil des repositories sind
+- ruft ein weiteres Script `openldap/generate_bootstrap.sh` auf um OpenLDAP zu vorzubereiten
+
+Mit dem `--reverse` Parameter können die Ersetzungen an den Konfigurationsdateien rückgängig gemacht werden. Das ist notwendig, wenn Änderungen an den Konfigurationsdateien vorgenommen werden soll und eingecheckt werden sollen.
 
 ### 3. Start des Systems und Nutzung
 ```bash
@@ -55,4 +65,4 @@ docker compose up --build
 ```
 
 ## Hinweis
-Alle Docker Volumes müssen entfernt werden, wenn Konfigurationsänderungen vorgenommen wurden, da sich einige Services sonst nicht korrekt neu initialisieren.
+Alle Docker Volumes müssen entfernt werden (`docker compose down --volumes`), wenn Konfigurationsänderungen vorgenommen wurden, da sich einige Services sonst nicht korrekt neu initialisieren.

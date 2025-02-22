@@ -2,9 +2,12 @@
 
 generate_ssha() {
     local password="$1"
-    local salt=$(openssl rand -base64 3)
-    local hash=$(printf "%s%s" "$password" "$salt" | openssl dgst -binary -sha1)
-    printf "{SSHA}%s" "$(printf "%s%s" "$hash" "$salt" | base64)"
+    local salt=$(openssl rand -base64 6)
+    local hash_salt=$(echo -n "$password$salt" | openssl dgst -sha1 -binary | (
+        cat
+        echo -n "$salt"
+    ) | base64)
+    echo "{SSHA}$hash_salt"
 }
 
 PASSWORD="meinpasswort"

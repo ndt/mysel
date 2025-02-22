@@ -2,41 +2,57 @@
 
 source .env
 
-echo "exclude files from git repo"
-git update-index --assume-unchanged keycloak/import/realm-export.json
-git update-index --assume-unchanged mailserver/dovecot-sql.conf.ext
-git update-index --assume-unchanged mailserver/dovecot-ldap.conf.ext
-git update-index --assume-unchanged postgres/init-django-db.sh
-git update-index --assume-unchanged postgres/init-roundcube-db.sh
-git update-index --assume-unchanged roundcube/config/config.local.inc.php
+# Array of files to exclude/include
+files=(
+  "keycloak/import/realm-export.json"
+  "mailserver/dovecot-sql.conf.ext" 
+  "mailserver/dovecot-ldap.conf.ext"
+  "postgres/init-django-db.sh"
+  "postgres/init-roundcube-db.sh"
+  "roundcube/config/config.local.inc.php"
+)
+# Define replacements as associative arrays with target files
+declare -A replacements=(
+  ["keycloak/import/realm-export.json"]="DJANGO_OIDC_SECRET LDAP_ADMIN_PASSWORD ROUNDCUBEMAIL_OIDC_SECRET"
+  ["mailserver/dovecot-sql.conf.ext"]="POSTGRES_DJANGO_DB POSTGRES_DOVECOT_USER POSTGRES_DOVECOT_PASSWORD"
+  ["mailserver/dovecot-ldap.conf.ext"]="LDAP_ADMIN_PASSWORD"
+  ["postgres/init-django-db.sh"]="POSTGRES_DJANGO_DB POSTGRES_DJANGO_USER POSTGRES_DJANGO_PASSWORD POSTGRES_DOVECOT_USER POSTGRES_DOVECOT_PASSWORD"
+  ["postgres/init-roundcube-db.sh"]="ROUNDCUBEMAIL_DB_USER ROUNDCUBEMAIL_DB_NAME ROUNDCUBEMAIL_DB_PASSWORD"
+  ["roundcube/config/config.local.inc.php"]="ROUNDCUBEMAIL_OIDC_SECRET"
+)
 
-echo "change passwords and secrets in various files"
-
-# Keycloak
-sed -i "s/DJANGO_OIDC_SECRET/${DJANGO_OIDC_SECRET}/g" keycloak/import/realm-export.json
-sed -i "s/LDAP_ADMIN_PASSWORD/${LDAP_ADMIN_PASSWORD}/g" keycloak/import/realm-export.json
-sed -i "s/ROUNDCUBEMAIL_OIDC_SECRET/${ROUNDCUBEMAIL_OIDC_SECRET}/g" keycloak/import/realm-export.json
-
-# dovecot
-sed -i "s/POSTGRES_DJANGO_DB/${POSTGRES_DJANGO_DB}/g" mailserver/dovecot-sql.conf.ext
-sed -i "s/POSTGRES_DOVECOT_USER/${POSTGRES_DOVECOT_USER}/g" mailserver/dovecot-sql.conf.ext
-sed -i "s/POSTGRES_DOVECOT_PASSWORD/${POSTGRES_DOVECOT_PASSWORD}/g" mailserver/dovecot-sql.conf.ext
-sed -i "s/LDAP_ADMIN_PASSWORD/${LDAP_ADMIN_PASSWORD}/g" mailserver/dovecot-ldap.conf.ext
-
-#postgres
-sed -i "s/POSTGRES_DJANGO_DB/${POSTGRES_DJANGO_DB}/g" postgres/init-django-db.sh
-sed -i "s/POSTGRES_DJANGO_USER/${POSTGRES_DJANGO_USER}/g" postgres/init-django-db.sh
-sed -i "s/POSTGRES_DJANGO_PASSWORD/${POSTGRES_DJANGO_PASSWORD}/g" postgres/init-django-db.sh
-sed -i "s/POSTGRES_DOVECOT_USER/${POSTGRES_DOVECOT_USER}/g" postgres/init-django-db.sh
-sed -i "s/POSTGRES_DOVECOT_PASSWORD/${POSTGRES_DOVECOT_PASSWORD}/g" postgres/init-django-db.sh
-sed -i "s/ROUNDCUBEMAIL_DB_USER/${ROUNDCUBEMAIL_DB_USER}/g" postgres/init-roundcube-db.sh
-sed -i "s/ROUNDCUBEMAIL_DB_NAME/${ROUNDCUBEMAIL_DB_NAME}/g" postgres/init-roundcube-db.sh
-sed -i "s/ROUNDCUBEMAIL_DB_PASSWORD/${ROUNDCUBEMAIL_DB_PASSWORD}/g" postgres/init-roundcube-db.sh
-
-#roundcube
-sed -i "s/ROUNDCUBEMAIL_OIDC_SECRET/${ROUNDCUBEMAIL_OIDC_SECRET}/g" roundcube/config/config.local.inc.php
-
-# openLDAP
-set -e
-./openldap/generate_bootstrap.sh
-
+# Check if --reverse flag is provided
+if [ "$1" == "--reverse" ]; then
+  echo "Reverting files to original state..."
+  for file in "${files[@]}"; do
+    git checkout -- "$file"
+    git update-index --no-assume-unchanged "$file"
+    echo "Reverted: $file"
+  done
+else
+  if [ ! -f .env ]; then
+    cp env.example .env
+    echo "Created .env file from env.example template"
+  else
+    echo ".env file already exists, skipping creation"
+  fi
+  
+  echo "Excluding files from git repo..."
+  for file in "${files[@]}"; do
+    git update-index --assume-unchanged "$file"
+    echo "Excluded: $file" 
+  done
+  
+  echo "Replacing passwords and secrets in various files..."
+  
+  # Process each file and its replacements
+  for file in "${!replacements[@]}"; do
+  for var in ${replacements[$file]}; do
+      sed -i "s/$var/${!var}/g" "$file"
+  done
+  done
+  
+  # openLDAP
+  set -e
+  ./openldap/generate_bootstrap.sh
+fi
