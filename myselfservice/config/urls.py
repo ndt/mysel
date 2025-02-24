@@ -1,9 +1,11 @@
 # config/urls.py
 from django.contrib import admin
 from django.urls import path, include
+from apps.core.views import CustomLogoutView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/logout/', CustomLogoutView.as_view(), name='account_logout'),
     path('accounts/', include('allauth.urls')),
     path('', include('apps.core.urls')),
     path('guests/', include('apps.guests.urls')),

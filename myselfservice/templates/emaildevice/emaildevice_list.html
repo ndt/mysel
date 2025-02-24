@@ -10,7 +10,9 @@
             <p class="card-text">Auf dieser Seite können Sie neue E-Mail-Zugangsdaten für Ihr E-Mail-Postfach konfigurieren und bestehende Zugangsdaten ändern.
                 Nachdem Sie eine neue Zugangsdaten erstellt haben, können Sie mithilfe der <a href="https://moodle.thga.de/ITInfrastruktur#section-3" target="_blank">Anleitungen</a> den Account in einem Email-Client einrichten.</p>
                 {% if deactivate_ldap_login %}
-                <p><span class="text-info"><i class="bi bi-info-circle"></i> Durch die Erstellung eines Accounts wird automatisch der Login an einem Email-Client (Thunderbird, Apple Mail, Outlook, Android Gmail, etc.) mit Ihrem "normalen" User-Account deaktiviert.</span></p>
+                <div class="alert alert-info" role="alert">
+                    Durch die Erstellung eines Accounts wird automatisch der Login an einem Email-Client (Thunderbird, Apple Mail, Outlook, Android Gmail, etc.) mit Ihrem "normalen" User-Account deaktiviert.
+                </div>
                 {% endif %}
                 <a class="mt-3" data-bs-toggle="collapse" href="#deviceManagement" role="button" aria-expanded="false" aria-controls="deviceManagement">
                 Weitere Informationen anzeigen

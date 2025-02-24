@@ -111,6 +111,7 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 ACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET=True
+SOCIALACCOUNT_LOGOUT_ON_GET = True
 
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
@@ -132,6 +133,9 @@ SOCIALACCOUNT_PROVIDERS = {
         ]
     }
 }
+
+CUSTOM_LOGOUT_OIDC = "http://keycloak:8080/realms/example/protocol/openid-connect/logout"
+
 SOCIALACCOUNT_ADAPTER = 'apps.core.adapters.CustomSocialAccountAdapter'
 
 # Password validation

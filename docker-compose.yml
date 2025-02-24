@@ -50,6 +50,7 @@ services:
       ROUNDCUBEMAIL_DEFAULT_HOST: "tls://mailserver"
       ROUNDCUBEMAIL_SMTP_SERVER: "tls://mailserver"
       ROUNDCUBEMAIL_DB_TYPE: "pgsql"
+      ROUNDCUBEMAIL_PLUGINS: "oidc_logout"
     env_file:
       - .env
     depends_on:
@@ -57,6 +58,7 @@ services:
       - mailserver
     volumes:
       - ./roundcube/config/:/var/roundcube/config
+      - ./roundcube/plugins/oidc_logout:/var/www/html/plugins/oidc_logout
     ports:
       - "8081:80"
     networks:
