@@ -2,15 +2,14 @@ import pytest
 import requests
 from bs4 import BeautifulSoup
 import imaplib
-import time
 
 class TestKeycloakAuthenticationAndMailLogin:
     def setup_method(self):
         self.mailserver = "mailserver"
         self.base_url = "http://myselfservice:8000"
         self.keycloak_url = "http://keycloak:8080"
-        self.test_username = "testuser1@example.org"
-        self.test_password = "testuser1"
+        self.test_username = "testuser2@example.org"
+        self.test_password = "testuser2"
         self.session = requests.Session()
         self._login()  # Führe Login für jeden Test durch
 
