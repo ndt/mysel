@@ -59,7 +59,7 @@ docker compose up --build
     2. Anmeldung mit LDAP-Zugangsdaten an imap (localhost:143 STARTTLS) nicht mehr möglich
     3. Anmeldung nur noch mit generierten Zugangsdaten möglich
 
-Dieser Testablauf kann auch automatisiert durchlaufen werden: `docker compose run --rm tests` 
+Dieser Testablauf wird beim Start von `docker compose up --build` automatisch mit dem User `testuser2@example.org` im Container tests durchgeführt. 
 
 
 ## Neustart nach Konfigurationsänderungen
