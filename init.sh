@@ -7,8 +7,6 @@ files=(
   "keycloak/import/realm-export.json"
   "mailserver/dovecot-sql.conf.ext" 
   "mailserver/dovecot-ldap.conf.ext"
-  "postgres/init-django-db.sh"
-  "postgres/init-roundcube-db.sh"
   "roundcube/config/config.local.inc.php"
 )
 # Define replacements as associative arrays with target files
