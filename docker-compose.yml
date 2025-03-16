@@ -1,4 +1,24 @@
 services:
+  freeradius:
+    build:
+      context: ./freeradius
+      dockerfile: Dockerfile
+    depends_on:
+      postgres_radius:
+        condition: service_healthy
+    container_name: freeradius
+    networks:
+      - mailnet
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'radtest bob test localhost 0 testing123'"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "1812-1813:1812-1813/udp"
+    tty: true
+    command: -X
+
   postgres:
     image: postgres:15
     container_name: postgres
@@ -10,6 +30,42 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - mailnet
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_DJANGO_DB} -d ${POSTGRES_DJANGO_USER}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command:
+      - "postgres" 
+      - "-c"
+      - "wal_level=logical"
+
+  postgres_radius:
+    image: postgres:15
+    container_name: postgres_radius
+    depends_on:
+      myselfservice:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ./postgres_radius/init-radius-db.sh:/docker-entrypoint-initdb.d/init-radius-db.sh
+      #- ./postgres_radius/schema.sql:/docker-entrypoint-initdb.d/y_schema.sql
+      #- ./postgres_radius/setup.sql:/docker-entrypoint-initdb.d/z_setup.sql
+      - postgres_data_radius:/var/lib/postgresql/data
+    networks:
+      - mailnet
+    #ports:
+    #  - "2345:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U radius -d radius'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command:
+      - "postgres" 
+      - "-c"
+      - "wal_level=logical"
 
   openldap:
     image: osixia/openldap:latest
@@ -95,13 +151,20 @@ services:
       context: ./myselfservice
       target: development
     depends_on:
-      - postgres
-      - keycloak
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
     volumes:
       - ./myselfservice:/app
     environment:
       - DEBUG=True
       - PYTHONPATH=/app
+    healthcheck:
+      test: ["CMD-SHELL", "python manage.py check"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .env
     networks:
@@ -119,13 +182,16 @@ services:
       mailserver:
         condition: service_started  
       myselfservice:
-        condition: service_started
+        condition: service_healthy
+      freeradius:
+        condition: service_healthy
     networks:
       - mailnet
 
 volumes:
   keycloak_data:
   postgres_data:
+  postgres_data_radius:
   mail_data:
 networks:
   mailnet:
