@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     wpasupplicant \
-    freeradius-utils
+    freeradius-utils \
+    eapoltest
 
 # Setze Working Directory
 WORKDIR /tests
