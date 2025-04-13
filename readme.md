@@ -35,6 +35,7 @@ Fügen Sie folgende Einträge in `/etc/hosts` hinzu:
 
 ### 2. Initialisierung
 ```bash
+cd docker/dev
 ./init.sh
 ```
 
@@ -49,7 +50,7 @@ Mit dem `--reverse` Parameter können die Ersetzungen an den Konfigurationsdatei
 
 ### 3. Start des Systems und Nutzung
 ```bash
-docker compose up --build
+docker compose -f docker-compose.dev.yml up --build
 ```
 1. Initialzustand:
     - Anmeldung an Webmail http://roundcube:8081 (SSO) und LDAP-Zugangsdaten (Username: testuser1@example.org, Passwort: testuser1)
@@ -59,14 +60,14 @@ docker compose up --build
     2. Anmeldung mit LDAP-Zugangsdaten an imap (localhost:143 STARTTLS) nicht mehr möglich
     3. Anmeldung nur noch mit generierten Zugangsdaten möglich
 
-Dieser Testablauf wird beim Start von `docker compose up --build` automatisch mit dem User `testuser2@example.org` im Container tests durchgeführt. 
+Dieser Testablauf wird beim Start von `docker compose -f docker-compose.dev.yml up --build` automatisch mit dem User `testuser2@example.org` im Container tests durchgeführt. 
 
 
 ## Neustart nach Konfigurationsänderungen
 Bei Änderungen an der Konfiguration:
 ```bash
-docker compose down --volumes
-docker compose up --build
+docker compose -f docker-compose.dev.yml down --volumes
+docker compose -f docker-compose.dev.yml up --build
 ```
 
 ## Hinweis

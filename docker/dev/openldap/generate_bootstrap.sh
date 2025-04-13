@@ -16,7 +16,7 @@ HASH=$(generate_ssha "$PASSWORD")
 echo "openLDAP User initialisieren"
 # Lade Umgebungsvariablen
 cd "$(dirname "${BASH_SOURCE[0]}")"
-source ../.env
+source ../.env.dev
 
 # Erstelle Bootstrap-Verzeichnisse
 mkdir -p bootstrap/ldif

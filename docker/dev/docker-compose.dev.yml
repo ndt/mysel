@@ -23,7 +23,7 @@ services:
     image: postgres:15
     container_name: postgres
     env_file:
-      - .env
+      - .env.dev
     volumes:
       - ./postgres/init-roundcube-db.sh:/docker-entrypoint-initdb.d/init-roundcube-db.sh
       - ./postgres/init-django-db.sh:/docker-entrypoint-initdb.d/init-django-db.sh
@@ -49,7 +49,7 @@ services:
       myselfservice:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.dev
     volumes:
       - ./postgres_radius/init-radius-db.sh:/docker-entrypoint-initdb.d/init-radius-db.sh
       #- ./postgres_radius/schema.sql:/docker-entrypoint-initdb.d/y_schema.sql
@@ -73,7 +73,7 @@ services:
     image: osixia/openldap:latest
     container_name: openldap
     env_file:
-      - .env
+      - .env.dev
     volumes:
       - ./openldap/bootstrap/schema:/container/service/slapd/assets/config/bootstrap/schema/custom
       - ./openldap/bootstrap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
@@ -92,7 +92,7 @@ services:
       - postgres
       - openldap
     env_file:
-      - .env
+      - .env.dev
     volumes:
       - mail_data:/var/mail
     ports:
@@ -110,7 +110,7 @@ services:
       ROUNDCUBEMAIL_DB_TYPE: "pgsql"
       ROUNDCUBEMAIL_PLUGINS: "oidc_logout"
     env_file:
-      - .env
+      - .env.dev
     depends_on:
       - postgres
       - mailserver
@@ -126,7 +126,7 @@ services:
     image: quay.io/keycloak/keycloak:26.1.0
     container_name: keycloak
     env_file:
-      - .env
+      - .env.dev
     environment:
       KC_IMPORT: /opt/keycloak/data/import/realm-export.json
       KC_HEALTH_ENABLED: true
@@ -150,7 +150,7 @@ services:
   myselfservice:
     container_name: myselfservice
     build: 
-      context: ./myselfservice
+      context: ../../myselfservice
       target: development
     depends_on:
       postgres:
@@ -158,7 +158,7 @@ services:
       keycloak:
         condition: service_started
     volumes:
-      - ./myselfservice:/app
+      - ../../myselfservice:/app
     environment:
       - DEBUG=True
       - PYTHONPATH=/app
@@ -168,7 +168,7 @@ services:
       timeout: 3s
       retries: 10
     env_file:
-      - .env
+      - .env.dev
     networks:
       - mailnet
     ports:

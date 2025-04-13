@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env
+source .env.dev
 
 # Array of files to exclude/include
 files=(
@@ -26,9 +26,9 @@ if [ "$1" == "--reverse" ]; then
     echo "Reverted: $file"
   done
 else
-  if [ ! -f .env ]; then
-    cp env.example .env
-    echo "Created .env file from env.example template"
+  if [ ! -f .env.dev ]; then
+    cp env.example .env.dev
+    echo "Created .env.dev file from env.example template"
   else
     echo ".env file already exists, skipping creation"
   fi
