@@ -32,7 +32,7 @@ ou: people
 EOF
 
 # Generiere User Einträge
-for i in {1..3}; do
+for i in {1..5}; do
     PASSWORD="${LDAP_USER_PASSWORD}${i}"
     HASH=$(generate_ssha "$PASSWORD")
     

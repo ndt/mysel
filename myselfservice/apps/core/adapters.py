@@ -6,26 +6,73 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
-    def pre_social_login(self, request, sociallogin):
-        try:
-            email = sociallogin.user.email
-            if email:
-                user = User.objects.filter(email=email).first()
-                if user:
-                    sociallogin.connect(request, user)
+    def populate_user(self, request, sociallogin, data):
+        user = super().populate_user(request, sociallogin, data)
+        logger.debug(f"Populated user ({user}) with data: {data}")
+        return user
             
-            if not sociallogin.user.id:
-                sociallogin.user.save()
-                    
-            extra_data = sociallogin.account.extra_data
-            logger.debug(f"Complete Token data: {extra_data}")
-
+    def _get_roles_from_provider(self, extra_data, provider_id):
+        """
+        Extrahiert Rollen basierend auf dem Provider
+        """
+        if provider_id == "keycloak":
             resource_access = extra_data.get('resource_access', {})
             client_access = resource_access.get('django', {})
-            client_roles = client_access.get('roles', [])
+            return client_access.get('roles', [])
+        elif provider_id == "shibboleth":
+            return extra_data.get('roles', [])
+        return []
 
+    def _get_user_info(self, extra_data, provider_id):
+        """
+        Extrahiert Benutzerinformationen basierend auf dem Provider
+        """
+        if provider_id == "keycloak":
+            return {
+                'first_name': extra_data.get('given_name', ''),
+                'last_name': extra_data.get('family_name', ''),
+                'email': extra_data.get('email', ''),
+            }
+        elif provider_id == "shibboleth":
+            name_parts = extra_data.get('name', '').split()
+            return {
+                'first_name': name_parts[0] if name_parts else '',
+                'last_name': ' '.join(name_parts[1:]) if len(name_parts) > 1 else '',
+                'email': extra_data.get('email', ''),
+            }
+        return {}
+
+    def pre_social_login(self, request, sociallogin):
+        try:
+            extra_data = sociallogin.account.extra_data
+            provider_id = sociallogin.account.provider
+            username = sociallogin.user.username
+            
+            logger.debug(f"Processing login for provider: {provider_id}")
+            logger.debug(f"Extra data from social login: {extra_data}")
+
+            if username:
+                existing_user = User.objects.filter(username=username).first()
+                if existing_user:
+                    # Benutzerinformationen basierend auf Provider abrufen
+                    user_info = self._get_user_info(extra_data, provider_id)
+                    
+                    # Aktualisiere User-Daten
+                    for key, value in user_info.items():
+                        setattr(existing_user, key, value)
+                    existing_user.save()
+                    
+                    logger.debug(f"Updated existing user data for {existing_user.username}")
+                    
+                    # Verbinde Social Account mit existierendem User
+                    sociallogin.user = existing_user
+                    sociallogin.connect(request, existing_user)
+
+            # Rollen basierend auf Provider abrufen
+            client_roles = self._get_roles_from_provider(extra_data, provider_id)
             logger.debug(f"Found client roles: {client_roles}")
             
+            # Berechtigungen zuweisen
             for role_name in client_roles:
                 for perm_value in settings.PERMISSION_REQUIRED.values():
                     app_label, codename = perm_value.split('.')

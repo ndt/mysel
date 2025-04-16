@@ -18,6 +18,9 @@ environ.Env.read_env(env_path)
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 OIDC_SECRET = env('DJANGO_OIDC_SECRET')
+SHIBBOLETH_CLIENT_ID = env('SHIBBOLETH_CLIENT_ID')
+SHIBBOLETH_OIDC_SECRET = env('SHIBBOLETH_OIDC_SECRET')
+SHIBBOLETH_SERVER_URL = env('SHIBBOLETH_SERVER_URL')
 
 FRC_CAPTCHA_SECRET = env('FRC_CAPTCHA_SECRET')
 FRC_CAPTCHA_SITE_KEY = env('FRC_CAPTCHA_SITE_KEY')
@@ -127,6 +130,16 @@ SOCIALACCOUNT_PROVIDERS = {
                 "secret": OIDC_SECRET,
                 "settings": {
                     "server_url": "http://keycloak:8080/realms/example/.well-known/openid-configuration",
+                    "scope": ['openid', 'profile', 'email', 'roles'],
+                },
+            },
+            {
+                "provider_id": "shibboleth",
+                "name": "SSO",
+                "client_id": SHIBBOLETH_CLIENT_ID,
+                "secret": SHIBBOLETH_OIDC_SECRET,
+                "settings": {
+                    "server_url": SHIBBOLETH_SERVER_URL,
                     "scope": ['openid', 'profile', 'email', 'roles'],
                 },
             },
