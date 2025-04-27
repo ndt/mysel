@@ -1,0 +1,38 @@
+# docker/prod/docker-compose.prod.yml
+services:
+  django:
+    build:
+      context: ../../myselfservice
+      target: production
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    networks:
+      - web
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - static_volume:/usr/share/nginx/html/static
+      - media_volume:/usr/share/nginx/html/media
+      - ./nginx:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - django
+    networks:
+      - web
+
+networks:
+  web:
+  backend:
+
+volumes:
+  static_volume:
+  media_volume:
