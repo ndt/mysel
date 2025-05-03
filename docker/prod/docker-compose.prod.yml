@@ -6,6 +6,8 @@ services:
       context: ../../myselfservice
       target: production
     restart: unless-stopped
+    logging:
+      driver: "journald"
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,6 +38,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - backend
+    logging:
+      driver: "journald"
     ports:
       - "5432:5432"
     healthcheck:
@@ -55,6 +59,8 @@ services:
       - static_volume:/usr/share/nginx/html/static:ro  # Match mit nginx conf
       - media_volume:/usr/share/nginx/html/media:ro    # Match mit nginx conf
       - ./nginx:/etc/nginx/conf.d
+    logging:
+      driver: "journald"
     ports:
       - "8080:80"
     depends_on:
